@@ -21,6 +21,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.core.config import settings
 from app.models.base import Base
+from app.models import User, Role, Permission  # noqa: E402, F401
 
 target_metadata = Base.metadata
 
@@ -77,10 +78,7 @@ def run_migrations_online() -> None:
             context.run_migrations()
 
 
-# Используем offline-режим, чтобы не требовать работающую БД для генерации
-run_migrations_offline()
-# Если нужно выполнить миграции — переключить на run_migrations_online()
-# if context.is_offline_mode():
-#     run_migrations_offline()
-# else:
-#     run_migrations_online()
+if context.is_offline_mode():
+    run_migrations_offline()
+else:
+    run_migrations_online()

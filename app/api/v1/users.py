@@ -3,9 +3,10 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependecies import get_current_user
+from app.core.dependencies import get_current_user
 from app.db.session import get_db
-from app.repositories import user as user_repo, permission as permission_repo
+from app.repositories import permission as permission_repo
+from app.repositories import user as user_repo
 from app.schemas.permission import RoleAssign
 from app.schemas.user import UserResponse
 from app.services.authorization import has_permission
@@ -30,7 +31,9 @@ async def get_users(
         list[UserResponse]: Список пользователей
     """
     if not await has_permission(db, current_user["user_id"], "users", "read"):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Access denied"
+        )
     users = await user_repo.get_all_users(db, skip=skip, limit=limit)
     return [
         UserResponse(
@@ -62,10 +65,14 @@ async def get_user(
         HTTPException: Если пользователь не найден
     """
     if not await has_permission(db, current_user["user_id"], "users", "read"):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Access denied"
+        )
     user = await user_repo.get_user_by_id(db, user_id)
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
     return UserResponse(
         id=user.id,
         email=user.email,
@@ -89,6 +96,7 @@ async def assign_role(
         body (RoleAssign): Идентификатор роли
     """
     if not await has_permission(db, current_user["user_id"], "roles", "assign"):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Access denied"
+        )
     await permission_repo.assign_role_to_user(db, user_id, body.role_id)
-
